@@ -4381,32 +4381,10 @@ DOKEYDOWN:
 		}
 		return 0;
 
-	#ifndef WM_POINTERDOWN
-		#define WM_POINTERDOWN   0x0246
-	#endif
-	#ifndef WM_POINTERUPDATE
-		#define WM_POINTERUPDATE   0x0245
-	#endif
-	#ifndef POINTER_MESSAGE_FLAG_INCONTACT
-		#define POINTER_MESSAGE_FLAG_INCONTACT   0x40000
-	#endif
-	#ifndef POINTER_MESSAGE_FLAG_FIRSTBUTTON
-		#define POINTER_MESSAGE_FLAG_FIRSTBUTTON   0x100000
-	#endif
-	case WM_POINTERDOWN:
-	case WM_POINTERUPDATE:
-
 	case WM_MOUSEMOVE:
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONDBLCLK:
-		if (mouseLeftClientArea)
-		{
-			TrackMouseEvent(&tme);
-			mouseLeftClientArea = false;
-		}
-		while (ShowCursor(TRUE) <= 0);
-		autoHideCursorTimer = SetTimer(hwnd, 1, 10000, NULL);
-
+		if (wParam & MK_LBUTTON)
 		if (((message==WM_POINTERDOWN || message== WM_POINTERUPDATE)
 			&& ((wParam & (POINTER_MESSAGE_FLAG_INCONTACT | POINTER_MESSAGE_FLAG_FIRSTBUTTON))))
 			|| (message != WM_POINTERDOWN && message != WM_POINTERUPDATE && (wParam & MK_LBUTTON)))
@@ -4415,17 +4393,6 @@ DOKEYDOWN:
 
 			s32 x = (s32)((s16)LOWORD(lParam));
 			s32 y = (s32)((s16)HIWORD(lParam));
-			if (message == WM_POINTERDOWN || message == WM_POINTERUPDATE)
-			{
-				POINT point;
-				point.x = x;
-				point.y = y;
-				ScreenToClient(hwnd, &point);
-				x = point.x;
-				y = point.y;
-			}
-			UnscaleScreenCoords(x,y);
-
 			if(HudEditorMode)
 			{
 				ToDSScreenRelativeCoords(x,y,0);
@@ -4475,21 +4442,10 @@ DOKEYDOWN:
 				return 0;
 			}
 		}
-		else if (message == WM_POINTERUPDATE
-			&& !(wParam & POINTER_MESSAGE_FLAG_INCONTACT | POINTER_MESSAGE_FLAG_FIRSTBUTTON))
-		{
-			ReleaseCapture();
-			HudClickRelease(&Hud);
-		}
 		if (!StylusAutoHoldPressed)
 			NDS_releaseTouch();
 		userTouchesScreen = false;
 		return 0;
-
-	#ifndef WM_POINTERUP
-		#define WM_POINTERUP   0x0247
-	#endif
-	case WM_POINTERUP:
 
 	case WM_LBUTTONUP:
 
